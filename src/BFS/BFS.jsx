@@ -536,7 +536,7 @@ export default class BFS extends React.Component {
   }
 
   drawObstacles() {
-    this.state.obstacles.map((l) => {
+    this.state.obstacles.forEach((l) => {
       const { q, r, s } = JSON.parse(l);
       const { x, y } = this.hexToPixel(this.Hex(q, r, s));
       this.drawHex(this.canvasHex, this.Point(x, y), 1, "black", "black");
@@ -557,31 +557,35 @@ export default class BFS extends React.Component {
     return arr;
   }
 
-  breadthFirstSearch(playerPosition) {
-    // performs bfs on hex grid
-    var frontier = [playerPosition];
-    var cameFrom = {};
-    cameFrom[JSON.stringify(playerPosition)] = JSON.stringify(playerPosition);
-    while (frontier.length !== 0) {
-      // explore neigbors of each hex in the frontier to find the path
-      var current = frontier.shift();
-      let arr = this.getNeighbors(current);
-      arr.map((l) => {
-        if (
-          !cameFrom.hasOwnProperty(JSON.stringify(l)) &&
-          this.state.hexPathMap.includes(JSON.stringify(l))
-        ) {
-          // checks if the current neighbor is not in the came from object and is included in hex path map arr
-          frontier.push(l);
-          cameFrom[JSON.stringify(l)] = JSON.stringify(current);
-        }
-      });
+breadthFirstSearch(playerPosition) {
+  // performs bfs on hex grid
+  var frontier = [playerPosition];
+  var cameFrom = {};
+  cameFrom[JSON.stringify(playerPosition)] = JSON.stringify(playerPosition);
+  
+  while (frontier.length !== 0) {
+    // explore neighbors of each hex in the frontier to find the path
+    var current = frontier.shift();
+    let arr = this.getNeighbors(current);
+    
+    for (let l of arr) { // Use regular for loop instead of map to fix the no-loop-func warning
+      if (
+        !cameFrom.hasOwnProperty(JSON.stringify(l)) &&
+        this.state.hexPathMap.includes(JSON.stringify(l))
+      ) {
+        // checks if the current neighbor is not in the came from object and is included in hex path map arr
+        frontier.push(l);
+        cameFrom[JSON.stringify(l)] = JSON.stringify(current);
+      }
     }
-    cameFrom = Object.assign({}, cameFrom); // sets camefrom object in the component state
-    this.setState({
-      cameFrom: cameFrom,
-    });
   }
+  
+  cameFrom = Object.assign({}, cameFrom); // sets camefrom object in the component state
+  this.setState({
+    cameFrom: cameFrom,
+  });
+}
+
 
   getPath(start, current) {
     // get path from the start hex to current hex
